@@ -8,6 +8,7 @@ from sklearn.metrics import classification_report
 from sklearn.tree import plot_tree
 from sklearn.neighbors import KNeighborsClassifier
 from collections import Counter
+from scipy.stats import zscore
 import os
 
 transactions = pandas.read_csv("C:\\Users\\Monster\\Desktop\\Erasmus 2025\\Internship WSTI\\IEEE\\ieee-fraud-detection\\train_transaction.csv")
@@ -44,7 +45,7 @@ print(transactions.isnull().sum())
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ON THIS SECTION I AM TRYING TO FILL MISSING DATA IN A COMPLEX WAY. INSTEAD OF FILLING WITH MOD I WILL TRY TO USE K-MEANS AND KNN TO FILL card4 COLUMN
+#ON THIS SECTION I AM TRYING TO FILL MISSING DATA IN A COMPLEX WAY. INSTEAD OF FILLING WITH MOD, I WILL TRY TO USE K-MEANS AND KNN TO FILL card4 COLUMN
 for col in ['card2', 'card3', 'card5']:
     transactions[col].fillna(transactions[col].median(), inplace=True)
     
@@ -59,7 +60,7 @@ encoder = LabelEncoder()
 for col in cat_cols:
     transactions[col] = encoder.fit_transform(transactions[col])
     
-print(transactions.isnull().sum())
+#print(transactions.isnull().sum())
 
 # # Sadece eksik olmayan satırlarla çalışıyoruz
 # df_tree = transactions[transactions['card4'].notnull()].copy()
@@ -132,13 +133,116 @@ print("Tahmin edilen card4 dağılımı:")
 for card_type, count in count_predicted.items():
     print(f"{card_type}: {count}")
     
-    
-#
+#-------------------------------------------------------------------------------------------------------------------------------------    
+#RESULTS ARE FOLLOWING
 # predicted_series = pandas.Series(predicted_labels)
 # print(predicted_series.value_counts())
-# print(transactions.isnull().sum())
-#1577 MISSING card4 VALUE WAS PREDICTED BY K-NEARIST NEIGHBOR ALGORITHM. 
+#print(transactions.isnull().sum())
+#1577 MISSING card4 VALUE WAS PREDICTED BY K-NEAREST NEIGHBOR ALGORITHM. 
 # 1188 WAS GUESSED VISA, 
 # 250 WAS GUESSED MASTERCARD,
 # 118 WAS GUESSED AMERICAN EXPRESS,
 #21 WAS GUESSED DISCOVER
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Detecting and resolving outliers
+print(transactions.head(50))
+import matplotlib.pyplot as plt
+import numpy as np
+
+# İncelemek istediğin sütun
+col = 'TransactionAmt'
+data = transactions[col].dropna()
+log_data = np.log1p(data)
+
+plt.figure(figsize=(10, 6))
+plt.hist(log_data, bins=100, color='orange', edgecolor='black')
+plt.title('Log-Transformed Transaction Amount Histogram')
+plt.xlabel('log(TransactionAmt + 1)')
+plt.ylabel('Frequency')
+plt.grid(True)
+plt.show()
+# IQR yöntemi ile sınırlar
+Q1 = data.quantile(0.25)
+Q3 = data.quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Aykırı değerleri filtrele
+outliers = data[(data < lower_bound) | (data > upper_bound)]
+#ortalama
+mean_val = data.mean()
+# Boxplot + scatter (sadece aykırılar)
+plt.figure(figsize=(12, 6))
+plt.boxplot(data, vert=False)
+plt.scatter(outliers, np.ones_like(outliers), color='red', label='Outliers', zorder=3)
+
+plt.title(f'{col} Boxplot with Outliers Highlighted')
+plt.xlabel(col)
+plt.legend()
+plt.grid(True)
+plt.show()
+print("Aykırı değer sayısı:", len(outliers))
+print("Q1:", Q1)
+print("Q3", Q3)
+print("Mean:", mean_val)
+negatives = transactions[transactions['TransactionAmt'] < 0]
+print(negatives[['TransactionAmt']])
+print(f"Negatif değer sayısı: {len(negatives)}")
+print(transactions['TransactionAmt'].dtype)
+
+col = 'TransactionAmt'
+data = transactions[col].dropna()
+
+# Z-score hesapla
+z_scores = zscore(data)
+threshold = 3  # Z-score eşiği
+
+# Aykırı değerleri belirle
+outliers = data[(np.abs(z_scores) > threshold)]
+mean_val = data.mean()
+
+# Görselleştir
+plt.figure(figsize=(12, 6))
+plt.boxplot(z_scores, vert=False)
+plt.scatter(z_scores[np.abs(z_scores) > threshold], 
+            np.ones_like(outliers), 
+            color='red', label='Z-score > 3', zorder=3)
+plt.title(f'Z-Score Normalized Boxplot for {col}')
+plt.xlabel('Z-score')
+plt.grid(True)
+plt.legend()
+plt.show()
+
+# Sonuçları yazdır
+print(f"Z-score ile aykırı değer sayısı: {len(outliers)}")
+print(f"Ortalama (orijinal ölçekte): {mean_val:.2f}")
+# Histogram çizimi
+plt.figure(figsize=(10, 6))
+plt.hist(data, bins=100, color='skyblue', edgecolor='black')
+plt.title('Transaction Amount Histogram')
+plt.xlabel('TransactionAmt')
+plt.ylabel('Frequency')
+plt.grid(True)
+plt.show()
+
+log_data = np.log1p(data)
+outliers = log_data[(log_data < lower_bound) | (log_data > upper_bound)]
+plt.figure(figsize=(10, 6))
+plt.hist(log_data, bins=100, color='orange', edgecolor='black')
+plt.title('Log-Transformed Transaction Amount Histogram')
+plt.xlabel('log(TransactionAmt + 1)')
+plt.ylabel('Frequency')
+plt.grid(True)
+plt.show()
+print(f"Log dönüşümü sonrası aykırı değer sayısı: {len(outliers)}")
+print("Bazı aykırı değerler örnekleri (log değerleri):")
+print(outliers.head(10))
+
+#USING LOG TRANSFORMATION AND Z-SCORE TO HANDLE 66482 OUTLIERS
+#RESULTS:
+#IF ONLY Z-SCORE USED RESULTS ARE 10093 OUTLIERSLEFT
+#LOG AND Z-SCORE GIVES US 0 OUTLIERS
+
+print(transactions.head(20))
