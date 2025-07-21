@@ -155,13 +155,13 @@ col = 'TransactionAmt'
 data = transactions[col].dropna()
 log_data = np.log1p(data)
 
-plt.figure(figsize=(10, 6))
-plt.hist(log_data, bins=100, color='orange', edgecolor='black')
-plt.title('Log-Transformed Transaction Amount Histogram')
-plt.xlabel('log(TransactionAmt + 1)')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+# plt.figure(figsize=(10, 6))
+# plt.hist(log_data, bins=100, color='orange', edgecolor='black')
+# plt.title('Log-Transformed Transaction Amount Histogram')
+# plt.xlabel('log(TransactionAmt + 1)')
+# plt.ylabel('Frequency')
+# plt.grid(True)
+# plt.show()
 # IQR yöntemi ile sınırlar
 Q1 = data.quantile(0.25)
 Q3 = data.quantile(0.75)
@@ -174,15 +174,15 @@ outliers = data[(data < lower_bound) | (data > upper_bound)]
 #ortalama
 mean_val = data.mean()
 # Boxplot + scatter (sadece aykırılar)
-plt.figure(figsize=(12, 6))
-plt.boxplot(data, vert=False)
-plt.scatter(outliers, np.ones_like(outliers), color='red', label='Outliers', zorder=3)
+# plt.figure(figsize=(12, 6))
+# plt.boxplot(data, vert=False)
+# plt.scatter(outliers, np.ones_like(outliers), color='red', label='Outliers', zorder=3)
 
-plt.title(f'{col} Boxplot with Outliers Highlighted')
-plt.xlabel(col)
-plt.legend()
-plt.grid(True)
-plt.show()
+# plt.title(f'{col} Boxplot with Outliers Highlighted')
+# plt.xlabel(col)
+# plt.legend()
+# plt.grid(True)
+# plt.show()
 print("Aykırı değer sayısı:", len(outliers))
 print("Q1:", Q1)
 print("Q3", Q3)
@@ -204,45 +204,49 @@ outliers = data[(np.abs(z_scores) > threshold)]
 mean_val = data.mean()
 
 # Görselleştir
-plt.figure(figsize=(12, 6))
-plt.boxplot(z_scores, vert=False)
-plt.scatter(z_scores[np.abs(z_scores) > threshold], 
-            np.ones_like(outliers), 
-            color='red', label='Z-score > 3', zorder=3)
-plt.title(f'Z-Score Normalized Boxplot for {col}')
-plt.xlabel('Z-score')
-plt.grid(True)
-plt.legend()
-plt.show()
+# plt.figure(figsize=(12, 6))
+# plt.boxplot(z_scores, vert=False)
+# plt.scatter(z_scores[np.abs(z_scores) > threshold], 
+#             np.ones_like(outliers), 
+#             color='red', label='Z-score > 3', zorder=3)
+# plt.title(f'Z-Score Normalized Boxplot for {col}')
+# plt.xlabel('Z-score')
+# plt.grid(True)
+# plt.legend()
+# plt.show()
 
 # Sonuçları yazdır
 print(f"Z-score ile aykırı değer sayısı: {len(outliers)}")
 print(f"Ortalama (orijinal ölçekte): {mean_val:.2f}")
-# Histogram çizimi
-plt.figure(figsize=(10, 6))
-plt.hist(data, bins=100, color='skyblue', edgecolor='black')
-plt.title('Transaction Amount Histogram')
-plt.xlabel('TransactionAmt')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+# # Histogram çizimi
+# plt.figure(figsize=(10, 6))
+# plt.hist(data, bins=100, color='skyblue', edgecolor='black')
+# plt.title('Transaction Amount Histogram')
+# plt.xlabel('TransactionAmt')
+# plt.ylabel('Frequency')
+# plt.grid(True)
+# plt.show()
 
 log_data = np.log1p(data)
 outliers = log_data[(log_data < lower_bound) | (log_data > upper_bound)]
-plt.figure(figsize=(10, 6))
-plt.hist(log_data, bins=100, color='orange', edgecolor='black')
-plt.title('Log-Transformed Transaction Amount Histogram')
-plt.xlabel('log(TransactionAmt + 1)')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
-print(f"Log dönüşümü sonrası aykırı değer sayısı: {len(outliers)}")
-print("Bazı aykırı değerler örnekleri (log değerleri):")
-print(outliers.head(10))
+# plt.figure(figsize=(10, 6))
+# plt.hist(log_data, bins=100, color='orange', edgecolor='black')
+# plt.title('Log-Transformed Transaction Amount Histogram')
+# plt.xlabel('log(TransactionAmt + 1)')
+# plt.ylabel('Frequency')
+# plt.grid(True)
+# plt.show()
+# print(f"Log dönüşümü sonrası aykırı değer sayısı: {len(outliers)}")
+# print("Bazı aykırı değerler örnekleri (log değerleri):")
+# print(outliers.head(10))
 
 #USING LOG TRANSFORMATION AND Z-SCORE TO HANDLE 66482 OUTLIERS
 #RESULTS:
 #IF ONLY Z-SCORE USED RESULTS ARE 10093 OUTLIERSLEFT
 #LOG AND Z-SCORE GIVES US 0 OUTLIERS
 
+
+print(transactions.isnull().sum())
+card_columns_to_drop = ["card1", "card2"]
+transactions.drop(columns=card_columns_to_drop, inplace=True)
 print(transactions.head(20))

@@ -103,13 +103,13 @@ le_card6 = LabelEncoder()
 df_subset['card6'] = le_card6.fit_transform(df_subset['card6'])
 
 # KDE plot for each card column
-for col in card_columns:
-    plt.figure(figsize=(10,4))
-    sns.kdeplot(df_subset.loc[df_subset['isFraud']==0, col], label='Non-Fraud', shade=True)
-    sns.kdeplot(df_subset.loc[df_subset['isFraud']==1, col], label='Fraud', shade=True)
-    plt.title(f'Distribution of {col} by Fraud Status')
-    plt.legend()
-    plt.show()
+# for col in card_columns:
+#     plt.figure(figsize=(10,4))
+#     sns.kdeplot(df_subset.loc[df_subset['isFraud']==0, col], label='Non-Fraud', shade=True)
+#     sns.kdeplot(df_subset.loc[df_subset['isFraud']==1, col], label='Fraud', shade=True)
+#     plt.title(f'Distribution of {col} by Fraud Status')
+#     plt.legend()
+#     plt.show()
 #RESULTS----------RESULTS-----------RESULTS--------------RESULTS-------RESULTS-------RESULTS-------RESULTS-------RESULTS-------RESULTS-------RESULTS-------RESULTS---
 
 #card1 and card2 will be eliminated and other elements (card3,card4,card5,card6) will be kept for training the model.
