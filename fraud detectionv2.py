@@ -9,6 +9,8 @@ from collections import Counter
 from scipy.stats import zscore
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
 # Load datasets
 transactions = pd.read_csv("C:\\Users\\Monster\\Desktop\\Erasmus 2025\\Internship WSTI\\IEEE\\ieee-fraud-detection\\train_transaction.csv")
 identity = pd.read_csv("C:\\Users\\Monster\\Desktop\\Erasmus 2025\\Internship WSTI\\IEEE\\ieee-fraud-detection\\train_identity.csv")
@@ -22,12 +24,12 @@ columns_to_del = ["TransactionID", "P_emaildomain", "R_emaildomain", "dist1", "d
 #  
 transactions.drop(columns=v_cols + m_cols + d_cols + c_cols + columns_to_del, inplace=True)
 transactions = transactions[~transactions['card6'].isin(['charge card', 'debit or credit'])]
-#print(transactions.head(20))
+##print(transactions.head(20))
 # missing_addr1_fraud_count = transactions[(transactions['addr1'].isnull()) & (transactions['addr2'].isnull()) & (transactions['isFraud'] == 1)].shape[0]
 
 
 
-# print(f"addr1 ve addr2 sütununda eksik ve isFraud=1 olan satır sayısı: {missing_addr1_fraud_count}")
+# #print(f"addr1 ve addr2 sütununda eksik ve isFraud=1 olan satır sayısı: {missing_addr1_fraud_count}")
 def encode_addr2(x):
     if pd.isna(x):
         return 1
@@ -39,11 +41,11 @@ def encode_addr2(x):
 transactions['addr2_encoded'] = transactions['addr2'].apply(encode_addr2)
 
 # Kontrol için dağılımı yazdıralım
-#print(transactions['addr2_encoded'].value_counts())
+##print(transactions['addr2_encoded'].value_counts())
 
 for col in ['card2', 'card3', 'card5']:
     transactions[col] = transactions[col].fillna(transactions[col].median())
-#print(transactions['addr2_encoded'].isnull().sum())
+##print(transactions['addr2_encoded'].isnull().sum())
 for col in ['addr1']:
     transactions[col] = transactions[col].fillna(transactions[col].mode()[0]).astype(str)
 
@@ -72,10 +74,10 @@ knn.fit(df_train[features], df_train['card4_encoded'])
 predicted_labels = le_card4.inverse_transform(knn.predict(df_pred[features]))
 transactions.loc[transactions['card4'].isnull(), 'card4'] = predicted_labels
 
-#print("Remaining missing card4 values:", transactions['card4'].isnull().sum())
-#print("Predicted card4 value distribution:")
-for k, v in Counter(predicted_labels).items():
-    print(f"{k}: {v}")
+##print("Remaining missing card4 values:", transactions['card4'].isnull().sum())
+##print("Predicted card4 value distribution:")
+# for k, v in Counter(predicted_labels).items():
+#     print(f"{k}: {v}")
 
 # Tahmin sonrası card4 için One-Hot Encoding uygula
 transactions = pd.get_dummies(transactions, columns=['card4'], dummy_na=True)
@@ -110,11 +112,11 @@ outliers_iqr = data[(data < lower_bound) | (data > upper_bound)]
 # plt.grid(True)
 # plt.show()
 
-#print("Number of IQR-based outliers:", len(outliers_iqr))
+##print("Number of IQR-based outliers:", len(outliers_iqr))
 
 # Check for negative transaction amounts
 negatives = transactions[transactions[col] < 0]
-#print(f"Number of negative values: {len(negatives)}")
+##print(f"Number of negative values: {len(negatives)}")
 
 col = 'TransactionAmt'
 data = transactions[col]
@@ -159,7 +161,7 @@ outliers_z = log_data[np.abs(log_zscores) > threshold]
 # plt.legend()
 # plt.show()
 
-# #print(f"Number of Z-score outliers (after log): {len(outliers_z)}")
+# ##print(f"Number of Z-score outliers (after log): {len(outliers_z)}")
 
 # 6. IQR-based outlier detection on log-transformed data
 Q1_log = log_data.quantile(0.25)
@@ -169,16 +171,16 @@ lower_bound_log = Q1_log - 1.5 * IQR_log
 upper_bound_log = Q3_log + 1.5 * IQR_log
 log_outliers_iqr = log_data[(log_data < lower_bound_log) | (log_data > upper_bound_log)]
 
-# #print(f"Number of IQR outliers after log transformation: {len(log_outliers_iqr)}")
-# #print("Sample outliers (log-transformed, IQR method):")
-# #print(log_outliers_iqr.head(10))
+# ##print(f"Number of IQR outliers after log transformation: {len(log_outliers_iqr)}")
+# ##print("Sample outliers (log-transformed, IQR method):")
+# ##print(log_outliers_iqr.head(10))
 
 # 7. Final: Add log and z-score columns to dataframe
 transactions[f'{col}_log'] = log_data
 transactions[f'{col}_log_zscore'] = log_zscores
 
 # # 8. Sample output
-# #print(transactions[[col, f'{col}_log', f'{col}_log_zscore']].head(20))
+# ##print(transactions[[col, f'{col}_log', f'{col}_log_zscore']].head(20))
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,20 +193,20 @@ transactions['Hour'] = (transactions['TransactionDT'] % 86400 // 3600).astype(in
 cards = transactions[['card1','card2','card3','card5']]
 
 # Eksik veri kontrolü
-#print(cards.isnull().sum())
+##print(cards.isnull().sum())
 
 # Basit istatistikler
-#print(cards.describe())
+##print(cards.describe())
 
 
 
 
 # Kart markasına göre sayısal sütunların ortalaması
-# #print(cards.groupby('card4')[['card1','card2','card3','card5','card6']].mean())
+# ##print(cards.groupby('card4')[['card1','card2','card3','card5','card6']].mean())
 
 # Korelasyon matrisi
 # corr = cards[['card1','card2','card3','card5','card6']].corr()
-# #print(corr)
+# ##print(corr)
 
 # Korelasyon matrisi görselleştirme
 # sns.heatmap(corr, annot=True, cmap='coolwarm')
@@ -226,14 +228,14 @@ cards = transactions[['card1','card2','card3','card5']]
 
 
 
-#print(transactions.head(20))
+##print(transactions.head(20))
 drop= ["TransactionDT", "card1", "card2", "TransactionAmt", "TransactionAmt_log", "card4_nan", "addr2","card6_nan","ProductCD_nan"]
 transactions.drop(columns=drop , inplace=True)
-#print(transactions.head(50))
+##print(transactions.head(50))
 #unique_values = transactions['addr2_encoded'].unique()
-#print("addr1 sütunundaki benzersiz değer sayısı:", len(unique_values))
-#print("Benzersiz değerler:", unique_values)
-#print(transactions['addr2_encoded'].value_counts())
+##print("addr1 sütunundaki benzersiz değer sayısı:", len(unique_values))
+##print("Benzersiz değerler:", unique_values)
+##print(transactions['addr2_encoded'].value_counts())
 
 
 
@@ -260,9 +262,9 @@ transactions.drop(columns=drop , inplace=True)
 # rare_fraud = transactions[(transactions['addr1'].isin(rare_addr1)) & (transactions['isFraud'] == 1)]
 
 # # Sonuçları göster
-# print(rare_fraud[['addr1', 'isFraud']])
-# print("1 defa geçen adres sayısı",rare_addr1)
-# print(f"\nToplam: {len(rare_fraud)} satır bulundu.")
+# #print(rare_fraud[['addr1', 'isFraud']])
+# #print("1 defa geçen adres sayısı",rare_addr1)
+# #print(f"\nToplam: {len(rare_fraud)} satır bulundu.")
 # Frekansı 1 olan addr1 değerlerini bul
 addr1_counts = transactions['addr1'].value_counts()
 rare_addr1 = addr1_counts[addr1_counts == 1].index
@@ -270,14 +272,35 @@ rare_addr1 = addr1_counts[addr1_counts == 1].index
 # Bu adresleri içeren satırları veriden çıkar
 transactions = transactions[~transactions['addr1'].isin(rare_addr1)]
 
-print(f"Kalan satır sayısı: {len(transactions)}")
+#print(f"Kalan satır sayısı: {len(transactions)}")
 
-print(transactions.tail(50))
-print(transactions.columns)
-print(transactions['addr1'].value_counts())
 
-print(transactions['addr1'].value_counts().tail(100))
+#print(transactions.columns)
+#print(transactions['addr1'].value_counts())
+
+#print(transactions['addr1'].value_counts().tail(100))
 unique_count = transactions['addr1'].nunique()
-print(f"'addr1' sütununda {unique_count} farklı değer var.")
+#print(f"'addr1' sütununda {unique_count} farklı değer var.")
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 #adres 1 sütununu düzenlemeye devam et IQR mı artık bilmiyorum şu sütunu da düzenle de gidek
+
+# fraud_ratio_per_addr1 = transactions.groupby('addr1')['isFraud'].mean() * 100
+# fraud_ratio_per_addr1 = fraud_ratio_per_addr1.sort_values(ascending=False)
+#Rates of fraud rows on addr1 unique values
+# #print(fraud_ratio_per_addr1)
+scaler = StandardScaler()
+
+transactions['addr1_standardized'] = scaler.fit_transform(transactions[['addr1']])
+standard_scaler = StandardScaler()
+transactions[['card3_standardized', 'card5_standardized']] = standard_scaler.fit_transform(transactions[['card3', 'card5']])
+ctd = ["addr1", "card3", "card5"]
+transactions.drop(columns=ctd, inplace=True)
+#print(transactions.tail(50))
+#print(transactions.columns)
+fraud_per_hour = transactions[transactions['isFraud'] == 1].groupby('Hour').size()
+
+
+#print(fraud_per_hour)
+
+#TRAIN DATASET IS READY TO USE MACHINE LEARNING ALGORITHMS PHASE 1 ------------------------------------------------------------------------------------
+#I WILL TAKE NECESSARY CODES TO ANOTHER PYTHON FILE TO WORK CLEAN AND DO SAME PRE-PROCESSING STEPS ON TEST DATASET TOO.
