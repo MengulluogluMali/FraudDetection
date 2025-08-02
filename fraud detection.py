@@ -14,10 +14,10 @@ import os
 transactions = pandas.read_csv("C:\\Users\\Monster\\Desktop\\Erasmus 2025\\Internship WSTI\\IEEE\\ieee-fraud-detection\\train_transaction.csv")
 identity = pandas.read_csv("C:\\Users\\Monster\\Desktop\\Erasmus 2025\\Internship WSTI\\IEEE\\ieee-fraud-detection\\train_identity.csv")
 #print(transactions.shape)
-#print(identity.shape)
+print(identity.shape)
 #print("\nTransaction columns:\n", transactions.columns.tolist()[:394])  
 #print("\nIdentity columns:\n", identity.columns.tolist()[:41])
-#print(transactions.head(12))
+print(transactions.head(50))
 #print(identity.head(12))
 #unique_products = transactions['ProductCD'].unique()
 #print("ProductCD sütunundaki benzersiz değerler:")
@@ -26,7 +26,7 @@ v_cols = [f'V{i}' for i in range(1, 340)]
 m_cols = [f'M{i}' for i in range(1, 10)]  
 d_cols = [f'D{i}' for i in range(1,16)]
 c_cols = [f'C{i}' for i in range(1,15)]
-columns_to_del = ["TransactionID", "P_emaildomain", "R_emaildomain", "dist1", "dist2"]
+columns_to_del = ["P_emaildomain", "R_emaildomain", "dist1", "dist2"]
 transactions.drop(columns=v_cols, inplace=True)
 transactions.drop(columns=m_cols, inplace=True)
 transactions.drop(columns=d_cols, inplace=True)
@@ -249,4 +249,6 @@ outliers = log_data[(log_data < lower_bound) | (log_data > upper_bound)]
 print(transactions.isnull().sum())
 card_columns_to_drop = ["card1", "card2"]
 transactions.drop(columns=card_columns_to_drop, inplace=True)
-print(transactions.head(20))
+#print(transactions.head(20))
+print(identity.columns)
+print(identity.head(50))
