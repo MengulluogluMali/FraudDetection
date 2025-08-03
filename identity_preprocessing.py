@@ -117,6 +117,35 @@ identity = identity.drop(columns=cols_to_drop)
 print(f"Silinen sütun sayısı: {len(cols_to_drop)}")
 print(f"Kalan sütun sayısı: {identity.shape[1]}")
 
+# 1. NaN'leri mod değeriyle doldur
+mode_val = identity['id_15'].mode()[0]
+identity['id_15'] = identity['id_15'].fillna(mode_val)
+
+# 2. One-hot encoding
+id15_dummies = pd.get_dummies(identity['id_15'], prefix='id_15')
+
+# 3. Yeni sütunları ekle
+identity = pd.concat([identity, id15_dummies], axis=1)
+
+# 4. Orijinal sütunu kaldır (istersen)
+identity.drop('id_15', axis=1, inplace=True)
+
+
+        
+        
+label_cols = ["id_12", "id_16", "id_28", "id_29"]
+le = LabelEncoder()
+
+for col in label_cols:
+    if col in identity.columns:
+        # En sık görülen (mod) değeri al
+        mode_val = identity[col].mode()[0]
+
+        # Güvenli atama: doğrudan sütunu güncelle
+        identity[col] = identity[col].fillna(mode_val)
+
+        # Label encoding
+        identity[col] = le.fit_transform(identity[col].astype(str))
 
 identity = identity.dropna(thresh=identity.shape[1] - 14)
 print(f"Remaining rows: {identity.shape[0]}")
@@ -128,3 +157,6 @@ for col in cols:
         print(identity[col].value_counts(dropna=False))
     else:
         print(f"\n{col} sütunu tabloda yok.")
+        
+        
+print(identity.head(50))
