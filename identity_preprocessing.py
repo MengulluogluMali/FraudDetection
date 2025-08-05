@@ -55,30 +55,30 @@ def qo(df):
 # only_trans_fraud_count = df_only_trans['isFraud'].sum()
 
 # # Sonuçları yazdır
-# print("Toplam eşleşen TransactionID sayısı:", len(common_ids))
-# print("Toplam eşleşmeyen TransactionID sayısı:", len(only_in_trans))
-# print("Eşleşenlerden kaç tanesi fraud:", common_fraud_count)
-# print("Eşleşmeyenlerden kaç tanesi fraud:", only_trans_fraud_count)
+# #print("Toplam eşleşen TransactionID sayısı:", len(common_ids))
+# #print("Toplam eşleşmeyen TransactionID sayısı:", len(only_in_trans))
+# #print("Eşleşenlerden kaç tanesi fraud:", common_fraud_count)
+# #print("Eşleşmeyenlerden kaç tanesi fraud:", only_trans_fraud_count)
 
 unique_device_info = identity['DeviceInfo'].dropna().unique()
 
-# Kaç farklı değer olduğunu yazdır
-print("Farklı DeviceInfo değeri sayısı:", len(unique_device_info))
-print("DeviceInfo değerleri:")
-print(unique_device_info)
+# # Kaç farklı değer olduğunu yazdır
+# #print("Farklı DeviceInfo değeri sayısı:", len(unique_device_info))
+# #print("DeviceInfo değerleri:")
+# #print(unique_device_info)
 
-l_starting_devices = identity['DeviceInfo'].dropna()
-l_starting_matches = l_starting_devices[l_starting_devices.str.startswith(('L', 'l'))]
-print("\nL ile başlayan DeviceInfo değerleri:")
-print(l_starting_matches.unique())
+# l_starting_devices = identity['DeviceInfo'].dropna()
+# l_starting_matches = l_starting_devices[l_starting_devices.str.startswith(('L', 'l'))]
+# #print("\nL ile başlayan DeviceInfo değerleri:")
+# #print(l_starting_matches.unique())
 
-identity['DeviceCategory'] = identity['DeviceInfo'].str.lower().fillna('').apply(
-    lambda x: 'iOS Device' if 'iphone' in x or 'ipad' in x or 'ios' in x else
-              'MacOS' if 'mac' in x or 'macos' in x else
-              'Windows' if 'windows' in x else
-              'Android'
-)
-print(identity['DeviceCategory'].value_counts())
+# identity['DeviceCategory'] = identity['DeviceInfo'].str.lower().fillna('').apply(
+#     lambda x: 'iOS Device' if 'iphone' in x or 'ipad' in x or 'ios' in x else
+#               'MacOS' if 'mac' in x or 'macos' in x else
+#               'Windows' if 'windows' in x else
+#               'Android'
+# )
+# #print(identity['DeviceCategory'].value_counts())
 
 
 cols_to_drop = ["id_33","DeviceType", "DeviceInfo","id_30","id_31"]
@@ -88,13 +88,13 @@ identity.drop(columns=cols_to_drop, inplace=True)
 
 
 
-for i in range(2, 30):
-    col = f"id_{i:02d}"
-    if col in identity.columns:
-        print(f"\n{col} - Unique Values ({identity[col].nunique()}):")
-        print(identity[col].unique())
-    else:
-        print(f"\n{col} sütunu identity tablosunda yok.")
+# for i in range(2, 30):
+#     col = f"id_{i:02d}"
+#     if col in identity.columns:
+#         #print(f"\n{col} - Unique Values ({identity[col].nunique()}):")
+#         print(identity[col].unique())
+#     else:
+#         print(f"\n{col} sütunu identity tablosunda yok.")
 
 
 # Her sütundaki eksik değerlerin oranını hesapla
@@ -105,8 +105,8 @@ missing_ratios_percent = (missing_ratios * 100).round(2)
 
 
 
-for col, perc in missing_ratios_percent.items():
-    print(f"{col}: {perc}%")
+# for col, perc in missing_ratios_percent.items():
+#     print(f"{col}: {perc}%")
 
 # %40'tan fazla eksik değere sahip sütunları bul
 cols_to_drop = missing_ratios[missing_ratios > 0.40].index
@@ -114,8 +114,8 @@ cols_to_drop = missing_ratios[missing_ratios > 0.40].index
 # Bu sütunları identity tablosundan kaldıralım
 identity = identity.drop(columns=cols_to_drop)
 
-print(f"Silinen sütun sayısı: {len(cols_to_drop)}")
-print(f"Kalan sütun sayısı: {identity.shape[1]}")
+#print(f"Silinen sütun sayısı: {len(cols_to_drop)}")
+#print(f"Kalan sütun sayısı: {identity.shape[1]}")
 
 # 1. NaN'leri mod değeriyle doldur
 mode_val = identity['id_15'].mode()[0]
@@ -148,15 +148,42 @@ for col in label_cols:
         identity[col] = le.fit_transform(identity[col].astype(str))
 
 identity = identity.dropna(thresh=identity.shape[1] - 14)
-print(f"Remaining rows: {identity.shape[0]}")
-cols = ["id_12", "id_15", "id_16", "id_28", "id_29"]
+#print(f"Remaining rows: {identity.shape[0]}")
+cols = ["id_01", "id_02", "id_05", "id_06", "id_11", "id_13","id_17","id_19","id_20"]
 
-for col in cols:
-    if col in identity.columns:
-        print(f"\n--- {col} ---")
-        print(identity[col].value_counts(dropna=False))
-    else:
-        print(f"\n{col} sütunu tabloda yok.")
+# for col in cols:
+#     if col in identity.columns:
+#         #print(f"\n--- {col} ---")
+#         print(identity[col].value_counts(dropna=False))
+#     else:
+#         print(f"\n{col} sütunu tabloda yok.")
         
         
-print(identity.head(50))
+# Hedef sütunlar
+columns_to_process = ['id_01', 'id_02', 'id_05', 'id_06', 'id_11', 'id_13', 'id_17', 'id_19', 'id_20']
+
+for col in columns_to_process:
+    # 1. NaN değerlerini mod ile doldur
+    mode_val = identity[col].mode()[0]
+    identity[col] = identity[col].fillna(mode_val)
+    
+    # 2. Z-score hesapla ve yeni sütuna al
+    new_col = col + '_zscore'
+    identity[new_col] = zscore(identity[col])
+    
+    # 3. Eski sütunu sil
+    identity.drop(col, axis=1, inplace=True)
+    
+bool_cols = ['id_35', 'id_36', 'id_37', 'id_38']
+
+for col in bool_cols:
+    # 1. NaN değerlerini mod ile doldur
+    mode_val = identity[col].mode()[0]
+    identity[col].fillna(mode_val, inplace=True)
+    
+    # 2. Label Encoding
+    le = LabelEncoder()
+    identity[col] = le.fit_transform(identity[col])
+    
+print(identity.columns)
+print(identity.sample(20))
