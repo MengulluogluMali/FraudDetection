@@ -32,7 +32,7 @@ v_cols = [f'V{i}' for i in range(1, 340)]
 m_cols = [f'M{i}' for i in range(1, 10)]
 d_cols = [f'D{i}' for i in range(1, 16)]
 c_cols = [f'C{i}' for i in range(1, 15)]
-columns_to_del = ["TransactionID", "P_emaildomain", "R_emaildomain", "dist1", "dist2"]
+columns_to_del = ["P_emaildomain", "R_emaildomain", "dist1", "dist2"]
 transactions.drop(columns=v_cols + m_cols + d_cols + c_cols + columns_to_del, inplace=True)
 transactions = transactions[~transactions['card6'].isin(['charge card', 'debit or credit'])]
 
@@ -116,8 +116,8 @@ standard_scaler = StandardScaler()
 transactions[['card3_standardized', 'card5_standardized']] = standard_scaler.fit_transform(transactions[['card3', 'card5']])
 ctd = ["addr1", "card3", "card5"]
 transactions.drop(columns=ctd, inplace=True)
-print(transactions.tail(50))
-print(transactions.columns)
+# print(transactions.tail(50))
+# print(transactions.columns)
 X = transactions.drop(columns=['isFraud'])
 y = transactions['isFraud']
 
@@ -127,32 +127,32 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # Modeli tanımla (class_weight='balanced' ile fraud dengesizliği dikkate alınır)
-rf_model = RandomForestClassifier(
-    n_estimators=100,
-    max_depth=None,
-    class_weight='balanced',
-    random_state=42,
-    n_jobs=-1
-)
+# rf_model = RandomForestClassifier(
+#     n_estimators=100,
+#     max_depth=None,
+#     class_weight='balanced',
+#     random_state=42,
+#     n_jobs=-1
+# )
 
 # Eğitimi başlat
-rf_model.fit(X_train, y_train)
+# rf_model.fit(X_train, y_train)
 
-# Tahmin
-y_pred = rf_model.predict(X_test)
-y_proba = rf_model.predict_proba(X_test)[:, 1]
+# # Tahmin
+# y_pred = rf_model.predict(X_test)
+# y_proba = rf_model.predict_proba(X_test)[:, 1]
 
-# Skorlar
-print("📊 Classification Report of Random Forest Classifier:\n")
-print(classification_report(y_test, y_pred))
+# # Skorlar
+# print("📊 Classification Report of Random Forest Classifier:\n")
+# print(classification_report(y_test, y_pred))
 
-print("🎯 ROC-AUC Skoru:", roc_auc_score(y_test, y_proba))
+# print("🎯 ROC-AUC Skoru:", roc_auc_score(y_test, y_proba))
 
-# Confusion matrix
-print("🧩 Confusion Matrix:\n")
-print(confusion_matrix(y_test, y_pred))
+# # Confusion matrix
+# print("🧩 Confusion Matrix:\n")
+# print(confusion_matrix(y_test, y_pred))
 
-fpr, tpr, thresholds = roc_curve(y_test, y_proba)
+# fpr, tpr, thresholds = roc_curve(y_test, y_proba)
 
 # plt.figure(figsize=(8, 5))
 # plt.plot(fpr, tpr, label=f"ROC curve (AUC = {roc_auc_score(y_test, y_proba):.2f})", color="darkorange")
@@ -165,97 +165,100 @@ fpr, tpr, thresholds = roc_curve(y_test, y_proba)
 # plt.tight_layout()
 # plt.show()
 
-importances = rf_model.feature_importances_
-features = X_train.columns
-feature_importance_df = pd.DataFrame({
-    'feature': features,
-    'importance': importances
-}).sort_values(by='importance', ascending=False)
+# importances = rf_model.feature_importances_
+# features = X_train.columns
+# feature_importance_df = pd.DataFrame({
+# #     'feature': features,
+# #     'importance': importances
+# }).sort_values(by='importance', ascending=False)
 
 # print("\n📌 En önemli 10 feature:\n")
 # print(feature_importance_df.head(10))
 
 # Modeli oluştur
-xgb_clf = xgb.XGBClassifier(
-    objective='binary:logistic',
-    eval_metric='logloss',
-    use_label_encoder=False,
-    n_estimators=100,
-    learning_rate=0.1,
-    max_depth=6,
-    random_state=42
-)
+# xgb_clf = xgb.XGBClassifier(
+#     objective='binary:logistic',
+#     eval_metric='logloss',
+#     use_label_encoder=False,
+#     n_estimators=100,
+#     learning_rate=0.1,
+#     max_depth=6,
+#     random_state=42
+# )
 
-# Eğitimi yap
-xgb_clf.fit(X_train, y_train)
+# # Eğitimi yap
+# xgb_clf.fit(X_train, y_train)
 
-# Tahmin yap
-y_pred = xgb_clf.predict(X_test)
-y_pred_proba = xgb_clf.predict_proba(X_test)[:, 1]
+# # Tahmin yap
+# y_pred = xgb_clf.predict(X_test)
+# y_pred_proba = xgb_clf.predict_proba(X_test)[:, 1]
 
-# Sonuçları yazdır
-print("\n📊 Classification Report:\n")
-print(classification_report(y_test, y_pred))
+# # Sonuçları yazdır
+# print("\n📊 Classification Report:\n")
+# print(classification_report(y_test, y_pred))
 
-print("🧩 Confusion Matrix:\n")
-print(confusion_matrix(y_test, y_pred))
+# print("🧩 Confusion Matrix:\n")
+# print(confusion_matrix(y_test, y_pred))
 
-roc_auc = roc_auc_score(y_test, y_pred_proba)
-print(f"\n🎯 ROC-AUC Skoru: {roc_auc}")
+# roc_auc = roc_auc_score(y_test, y_pred_proba)
+# print(f"\n🎯 ROC-AUC Skoru: {roc_auc}")
 
-# Orijinal sınıf dağılımını göster
-print("🔍 Orijinal sınıf dağılımı:", Counter(y_train))
+# # Orijinal sınıf dağılımını göster
+# print("🔍 Orijinal sınıf dağılımı:", Counter(y_train))
 
 # Dengeleme pipeline'ı: önce oversample sonra undersample
-over = SMOTE(sampling_strategy=0.2, random_state=42)  # Azınlık sınıfını %10 olacak şekilde arttır
-under = RandomUnderSampler(sampling_strategy=0.4, random_state=42)  # Azınlık:Çoğunluk = 1:2 olacak şekilde azalt
+# over = SMOTE(sampling_strategy=0.2, random_state=42)  # Azınlık sınıfını %10 olacak şekilde arttır
+# under = RandomUnderSampler(sampling_strategy=0.4, random_state=42)  # Azınlık:Çoğunluk = 1:2 olacak şekilde azalt
 
-pipeline = Pipeline(steps=[('o', over), ('u', under)])
+# pipeline = Pipeline(steps=[('o', over), ('u', under)])
 
-# Yeni dengelenmiş veriyi oluştur
-X_resampled, y_resampled = pipeline.fit_resample(X_train, y_train)
+# # Yeni dengelenmiş veriyi oluştur
+# X_resampled, y_resampled = pipeline.fit_resample(X_train, y_train)
 
 # Yeni sınıf dağılımını yazdır
-print("🎯 Dengeleme sonrası sınıf dağılımı:", Counter(y_resampled))
+# print("🎯 Dengeleme sonrası sınıf dağılımı:", Counter(y_resampled))
 
-# Dengeleme sonrası örnek sayıları
-print(f"\n📈 Eğitim verisi boyutu önce: {X_train.shape[0]} → sonra: {X_resampled.shape[0]}")
+# # Dengeleme sonrası örnek sayıları
+# print(f"\n📈 Eğitim verisi boyutu önce: {X_train.shape[0]} → sonra: {X_resampled.shape[0]}")
 
-rf_model = RandomForestClassifier(
-    n_estimators=100,
-    class_weight='balanced',
-    random_state=42,
-    n_jobs=-1
-)
+# rf_model = RandomForestClassifier(
+#     n_estimators=100,
+#     class_weight='balanced',
+#     random_state=42,
+#     n_jobs=-1
+# )
 
-rf_model.fit(X_resampled, y_resampled)
-y_pred_rf = rf_model.predict(X_test)
-y_proba_rf = rf_model.predict_proba(X_test)[:, 1]
+# rf_model.fit(X_resampled, y_resampled)
+# y_pred_rf = rf_model.predict(X_test)
+# y_proba_rf = rf_model.predict_proba(X_test)[:, 1]
 
-print("\n--- Random Forest Classification Report ---")
-print(classification_report(y_test, y_pred_rf))
+# print("\n--- Random Forest Classification Report ---")
+# print(classification_report(y_test, y_pred_rf))
 
-print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_rf))
-print("ROC-AUC Score:", roc_auc_score(y_test, y_proba_rf))
+# print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_rf))
+# print("ROC-AUC Score:", roc_auc_score(y_test, y_proba_rf))
 
-# 3. XGBoost Modeli Eğit ve Değerlendir
-xgb_model = xgb.XGBClassifier(
-    objective='binary:logistic',
-    eval_metric='logloss',
-    use_label_encoder=False,
-    n_estimators=100,
-    learning_rate=0.1,
-    max_depth=6,
-    random_state=42,
-    n_jobs=-1
-)
+# # 3. XGBoost Modeli Eğit ve Değerlendir
+# xgb_model = xgb.XGBClassifier(
+#     objective='binary:logistic',
+#     eval_metric='logloss',
+#     use_label_encoder=False,
+#     n_estimators=100,
+#     learning_rate=0.1,
+#     max_depth=6,
+#     random_state=42,
+#     n_jobs=-1
+# )
 
-xgb_model.fit(X_resampled, y_resampled)
-y_pred_xgb = xgb_model.predict(X_test)
-y_proba_xgb = xgb_model.predict_proba(X_test)[:, 1]
+# xgb_model.fit(X_resampled, y_resampled)
+# y_pred_xgb = xgb_model.predict(X_test)
+# y_proba_xgb = xgb_model.predict_proba(X_test)[:, 1]
 
-print("\n--- XGBoost Classification Report ---")
-print(classification_report(y_test, y_pred_xgb))
+# print("\n--- XGBoost Classification Report ---")
+# print(classification_report(y_test, y_pred_xgb))
 
-print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_xgb))
-print("ROC-AUC Score:", roc_auc_score(y_test, y_proba_xgb))
+# print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_xgb))
+# print("ROC-AUC Score:", roc_auc_score(y_test, y_proba_xgb))
+
+
+transactions_processed = transactions

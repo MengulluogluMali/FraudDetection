@@ -185,5 +185,7 @@ for col in bool_cols:
     le = LabelEncoder()
     identity[col] = le.fit_transform(identity[col])
     
-print(identity.columns)
-print(identity.sample(20))
+# print(identity.columns)
+# print(identity.sample(20))
+
+processed_identity = identity
