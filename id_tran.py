@@ -218,22 +218,22 @@ prob_df = pd.DataFrame({
 dfdf = prob_df[(prob_df['Fraud_Probability'] <= low_risk_max) & (prob_df['TrueLabel'] == 1)]
 
 # Kaç satır olduğunu göster
-print(f"Kaçırılan fraud sayısı (Low Risk içinde): {len(dfdf)}")
+# print(f"Kaçırılan fraud sayısı (Low Risk içinde): {len(dfdf)}")
 
-# İlk birkaç satırı göster
-print(dfdf.head(50))
+# # İlk birkaç satırı göster
+# print(dfdf.head(50))
 
-explainer = shap.TreeExplainer(lgbm_model)
+# explainer = shap.TreeExplainer(lgbm_model)
 
-# Test verisi üzerinde SHAP değerleri hesapla
-shap_values = explainer.shap_values(X_test)
+# # Test verisi üzerinde SHAP değerleri hesapla
+# shap_values = explainer.shap_values(X_test)
 
-# Genel önemli özellikler
-shap.summary_plot(shap_values, X_test, plot_type="bar")
+# # Genel önemli özellikler
+# shap.summary_plot(shap_values, X_test, plot_type="bar")
 
-# Detaylı global özet grafik (renkli)
-shap.summary_plot(shap_values, X_test)
+# # Detaylı global özet grafik (renkli)
+# shap.summary_plot(shap_values, X_test)
 
-# Belirli bir örnek için açıklama (mesela 5. satır)
-idx = 5
-shap.force_plot(explainer.expected_value, shap_values[idx], X_test.iloc[idx])
+# # Belirli bir örnek için açıklama (mesela 5. satır)
+# idx = 5
+# shap.force_plot(explainer.expected_value, shap_values[idx], X_test.iloc[idx])
