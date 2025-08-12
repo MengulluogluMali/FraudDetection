@@ -237,3 +237,46 @@ dfdf = prob_df[(prob_df['Fraud_Probability'] <= low_risk_max) & (prob_df['TrueLa
 # # Belirli bir örnek için açıklama (mesela 5. satır)
 # idx = 5
 # shap.force_plot(explainer.expected_value, shap_values[idx], X_test.iloc[idx])
+# Risk kategorilerini tekrar tanımlayalım
+bins = [0.0, 0.35, 0.70, 1.0]
+labels = ['Low Risk', 'Medium Risk', 'High Risk']
+
+# Test seti + tahminler
+final_df = data.loc[y_test.index, :].copy()
+
+# Model tahmin olasılığı
+final_df['Fraud_Probability'] = y_probs
+
+# Risk kategorisi
+final_df['Risk_Category'] = pd.cut(
+    y_probs,
+    bins=bins,
+    labels=labels,
+    include_lowest=True
+)
+
+# Tahmin edilen etiket (0/1)
+final_df['Predicted_Label'] = (y_probs >= 0.32).astype(int)
+
+# Gerçek etiket (isFraud)
+final_df['True_Label'] = y_test
+
+# Doğru / Yanlış Tahmin bilgisi
+final_df['Prediction_Result'] = np.where(
+    final_df['Predicted_Label'] == final_df['True_Label'],
+    'Correct',
+    'Incorrect'
+)
+
+# Eğer LightGBM'den feature importance almak istersen
+feature_importance = pd.DataFrame({
+    'Feature': X_train.columns,
+    'Importance': lgbm_model.feature_importances_
+}).sort_values(by='Importance', ascending=False)
+
+# Çıktıları kaydet
+final_df.to_csv("fraud_analysis_results.csv", index=False)
+feature_importance.to_csv("feature_importance.csv", index=False)
+
+print("\n✅ 'fraud_analysis_results.csv' dosyası oluşturuldu (Power BI için hazır).")
+print("✅ 'feature_importance.csv' dosyası oluşturuldu (özellik önemleri).")
