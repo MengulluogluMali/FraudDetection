@@ -59,3 +59,6 @@ transactions["TransactionAmt_Category"] = transaction_amt.apply(categorize_amt)
 print(transactions[["TransactionAmt", "TransactionAmt_Category"]].sample(20))
 powerdf["TransactionAmt"] = transactions["TransactionAmt_Category"]
 print(powerdf.head(50))
+drop = ["TransactionID", "isFraud", "TransactionDT", "TransactionAmt", "ProductCD","card1","card2","card3","card4","card5"]
+transactions.drop(columns=drop, inplace=True)
+print(transactions.sample(50))
