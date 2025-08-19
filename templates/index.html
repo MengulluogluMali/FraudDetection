@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fraud Detection</title>
+</head>
+<body>
+    <h1>Fraud Detection Form</h1>
+    <form method="post">
+
+        <h3>Numeric Inputs</h3>
+        {% for col in numeric_cols %}
+            <label>{{ col }}:</label>
+            <input type="number" step="0.01" name="{{ col }}" required><br><br>
+        {% endfor %}
+
+        <h3>ProductCD</h3>
+        {% for val in productCD_map %}
+            <input type="radio" name="ProductCD" value="{{ val }}" required> {{ val }}
+        {% endfor %}
+        <br><br>
+
+        <h3>Card4</h3>
+        {% for val in card4_map %}
+            <input type="radio" name="card4" value="{{ val }}" required> {{ val }}
+        {% endfor %}
+        <br><br>
+
+        <h3>Card6</h3>
+        {% for val in card6_map %}
+            <input type="radio" name="card6" value="{{ val }}" required> {{ val }}
+        {% endfor %}
+        <br><br>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if prediction %}
+        <h2>Prediction: {{ prediction }}</h2>
+    {% endif %}
+</body>
+</html>

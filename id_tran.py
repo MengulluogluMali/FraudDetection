@@ -13,270 +13,279 @@ from lightgbm import LGBMClassifier
 from xgboost import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier
 import shap
+import joblib  
 # INNER JOIN
 data = pd.merge(transactions, identity, on="TransactionID", how="inner")
 
 # Eksik veri kontrolü
-missing_values = data.isnull().sum()
-missing_values = missing_values[missing_values > 0].sort_values(ascending=False)
+# missing_values = data.isnull().sum()
+# missing_values = missing_values[missing_values > 0].sort_values(ascending=False)
 
-print("Eksik veri içeren sütunlar (ilk 20):\n")
-print(missing_values.head(20))
-print(f"\nToplam {missing_values.shape[0]} sütunda eksik değer var.")
+# print("Eksik veri içeren sütunlar (ilk 20):\n")
+# print(missing_values.head(20))
+# print(f"\nToplam {missing_values.shape[0]} sütunda eksik değer var.")
 
-X = data.drop(columns=['isFraud', 'TransactionID'])
-y = data['isFraud']
+# X = data.drop(columns=['isFraud', 'TransactionID'])
+# y = data['isFraud']
 
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+# # Train-test split
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-# Modelleri tanımla
-models = {
-    "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42),
-    "RandomForest": RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
-}
+# # Modelleri tanımla
+# models = {
+#     "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42),
+#     "RandomForest": RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+# }
 
-for name, model in models.items():
-    print(f"\n{name} Model Eğitiliyor...")
-    model.fit(X_train, y_train)
+# for name, model in models.items():
+#     print(f"\n{name} Model Eğitiliyor...")
+#     model.fit(X_train, y_train)
     
-    # Tahminler
-    y_pred = model.predict(X_test)
-    y_pred_prob = model.predict_proba(X_test)[:,1]
+#     # Tahminler
+#     y_pred = model.predict(X_test)
+#     y_pred_prob = model.predict_proba(X_test)[:,1]
     
-    # Metrikler
-    auc = roc_auc_score(y_test, y_pred_prob)
-    precision = precision_score(y_test, y_pred)
-    recall = recall_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
+#     # Metrikler
+#     auc = roc_auc_score(y_test, y_pred_prob)
+#     precision = precision_score(y_test, y_pred)
+#     recall = recall_score(y_test, y_pred)
+#     f1 = f1_score(y_test, y_pred)
     
-    # print(f"{name} AUC: {auc:.4f}")
-    # print(f"{name} Precision: {precision:.4f}")
-    # print(f"{name} Recall: {recall:.4f}")
-    # print(f"{name} F1-Score: {f1:.4f}")
+#     # print(f"{name} AUC: {auc:.4f}")
+#     # print(f"{name} Precision: {precision:.4f}")
+#     # print(f"{name} Recall: {recall:.4f}")
+#     # print(f"{name} F1-Score: {f1:.4f}")
     
-    # print("\nClassification Report:")
-    # print(classification_report(y_test, y_pred))
+#     # print("\nClassification Report:")
+#     # print(classification_report(y_test, y_pred))
     
-    # # Confusion Matrix
-    # cm = confusion_matrix(y_test, y_pred)
-    # plt.figure(figsize=(5,4))
-    # sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
-    # plt.title(f"{name} Confusion Matrix")
-    # plt.xlabel("Tahmin")
-    # plt.ylabel("Gerçek")
-    # plt.show()
+#     # # Confusion Matrix
+#     # cm = confusion_matrix(y_test, y_pred)
+#     # plt.figure(figsize=(5,4))
+#     # sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+#     # plt.title(f"{name} Confusion Matrix")
+#     # plt.xlabel("Tahmin")
+#     # plt.ylabel("Gerçek")
+#     # plt.show()
     
-    # # Feature Importance
-    # if name == "XGBoost":
-    #     importance = model.get_booster().get_score(importance_type='weight')
-    #     importance_df = pd.DataFrame({
-    #         'Feature': list(importance.keys()),
-    #         'Importance': list(importance.values())
-    #     }).sort_values(by='Importance', ascending=False).head(20)
-    # else:
-    #     importance_df = pd.DataFrame({
-    #         'Feature': X.columns,
-    #         'Importance': model.feature_importances_
-    #     }).sort_values(by='Importance', ascending=False).head(20)
+#     # # Feature Importance
+#     # if name == "XGBoost":
+#     #     importance = model.get_booster().get_score(importance_type='weight')
+#     #     importance_df = pd.DataFrame({
+#     #         'Feature': list(importance.keys()),
+#     #         'Importance': list(importance.values())
+#     #     }).sort_values(by='Importance', ascending=False).head(20)
+#     # else:
+#     #     importance_df = pd.DataFrame({
+#     #         'Feature': X.columns,
+#     #         'Importance': model.feature_importances_
+#     #     }).sort_values(by='Importance', ascending=False).head(20)
     
-    # plt.figure(figsize=(10,6))
-    # sns.barplot(x='Importance', y='Feature', data=importance_df)
-    # plt.title(f"{name} - En Önemli 20 Özellik")
-    # plt.tight_layout()
-    # plt.show()
+#     # plt.figure(figsize=(10,6))
+#     # sns.barplot(x='Importance', y='Feature', data=importance_df)
+#     # plt.title(f"{name} - En Önemli 20 Özellik")
+#     # plt.tight_layout()
+#     # plt.show()
     
-    y_probs = model.predict_proba(X_test)[:, 1]
+#     y_probs = model.predict_proba(X_test)[:, 1]
 
-# ROC eğrisi verilerini al
-fpr, tpr, thresholds = roc_curve(y_test, y_probs)
+# # ROC eğrisi verilerini al
+# fpr, tpr, thresholds = roc_curve(y_test, y_probs)
 
-# En iyi eşik: TPR yüksek, FPR düşük (sol üst nokta)
-optimal_idx = (tpr - fpr).argmax()
-optimal_threshold_roc = thresholds[optimal_idx]
-print("ROC Optimal Threshold:", optimal_threshold_roc)
+# # En iyi eşik: TPR yüksek, FPR düşük (sol üst nokta)
+# optimal_idx = (tpr - fpr).argmax()
+# optimal_threshold_roc = thresholds[optimal_idx]
+# print("ROC Optimal Threshold:", optimal_threshold_roc)
 
-# ROC Optimal Threshold'a göre yeniden sınıflandır
-y_pred_optimal = (y_probs >= optimal_threshold_roc).astype(int)
+# # ROC Optimal Threshold'a göre yeniden sınıflandır
+# y_pred_optimal = (y_probs >= optimal_threshold_roc).astype(int)
 
-# Yeni metriklerle yeniden değerlendirme
-# print("\n*** ROC Optimal Threshold Kullanılarak Güncellenmiş Metrikler ***")
-# print(f"Threshold: {optimal_threshold_roc:.4f}")
-# print(classification_report(y_test, y_pred_optimal, digits=4))
+# # Yeni metriklerle yeniden değerlendirme
+# # print("\n*** ROC Optimal Threshold Kullanılarak Güncellenmiş Metrikler ***")
+# # print(f"Threshold: {optimal_threshold_roc:.4f}")
+# # print(classification_report(y_test, y_pred_optimal, digits=4))
 
-# # Confusion Matrix
-# cm_opt = confusion_matrix(y_test, y_pred_optimal)
-# plt.figure(figsize=(5,4))
-# sns.heatmap(cm_opt, annot=True, fmt="d", cmap="Oranges")
-# plt.title("ROC Eşiği ile Confusion Matrix")
-# plt.xlabel("Tahmin")
-# plt.ylabel("Gerçek")
-# plt.show()
-
-
-precisions, recalls, thresholds = precision_recall_curve(y_test, y_probs)
-
-# F1 skoru ile en iyi eşik
-f1_scores = 2 * (precisions * recalls) / (precisions + recalls + 1e-6)
-best_thresh_idx = np.argmax(f1_scores)
-best_thresh = thresholds[best_thresh_idx]
-
-print(f"PR Curve Optimal Threshold (F1 Max): {best_thresh:.4f}")
-
-y_pred_pr = (y_probs >= 0.32).astype(int)
+# # # Confusion Matrix
+# # cm_opt = confusion_matrix(y_test, y_pred_optimal)
+# # plt.figure(figsize=(5,4))
+# # sns.heatmap(cm_opt, annot=True, fmt="d", cmap="Oranges")
+# # plt.title("ROC Eşiği ile Confusion Matrix")
+# # plt.xlabel("Tahmin")
+# # plt.ylabel("Gerçek")
+# # plt.show()
 
 
+# precisions, recalls, thresholds = precision_recall_curve(y_test, y_probs)
+
+# # F1 skoru ile en iyi eşik
+# f1_scores = 2 * (precisions * recalls) / (precisions + recalls + 1e-6)
+# best_thresh_idx = np.argmax(f1_scores)
+# best_thresh = thresholds[best_thresh_idx]
+
+# print(f"PR Curve Optimal Threshold (F1 Max): {best_thresh:.4f}")
+
+# y_pred_pr = (y_probs >= 0.32).astype(int)
 
 
-# print("PR Curve Optimal Threshold: 0.32\n")
-# print(confusion_matrix(y_test, y_pred_pr))
-# print("\n", classification_report(y_test, y_pred_pr, digits=4))
 
-# cm_pr = confusion_matrix(y_test, y_pred_pr)
 
-# Matrisin çıktısı
-# print(cm_pr)
-# optimal_threshold_pr = 0.32
-# # Görselleştir
-# plt.figure(figsize=(5,4))
-# sns.heatmap(cm_pr, annot=True, fmt="d", cmap="Greens")
-# plt.title(f"Confusion Matrix (PR Threshold = {optimal_threshold_pr})")
-# plt.xlabel("Tahmin")
-# plt.ylabel("Gerçek")
-# plt.show()
+# # print("PR Curve Optimal Threshold: 0.32\n")
+# # print(confusion_matrix(y_test, y_pred_pr))
+# # print("\n", classification_report(y_test, y_pred_pr, digits=4))
 
-X_train_split, X_valid, y_train_split, y_valid = train_test_split(
-    X_train, y_train, test_size=0.2, random_state=42, stratify=y_train
-)
+# # cm_pr = confusion_matrix(y_test, y_pred_pr)
 
-# Modeli tanımla
-lgbm_model = LGBMClassifier(
-    n_estimators=1000,
-    learning_rate=0.05,
-    objective='binary',
-    class_weight='balanced',
-    random_state=42
-)
+# # Matrisin çıktısı
+# # print(cm_pr)
+# # optimal_threshold_pr = 0.32
+# # # Görselleştir
+# # plt.figure(figsize=(5,4))
+# # sns.heatmap(cm_pr, annot=True, fmt="d", cmap="Greens")
+# # plt.title(f"Confusion Matrix (PR Threshold = {optimal_threshold_pr})")
+# # plt.xlabel("Tahmin")
+# # plt.ylabel("Gerçek")
+# # plt.show()
 
-# Modeli eğit
-lgbm_model.fit(
-    X_train,
-    y_train,
-    eval_set=[(X_test, y_test)],
-    eval_metric='auc'
-)
+# X_train_split, X_valid, y_train_split, y_valid = train_test_split(
+#     X_train, y_train, test_size=0.2, random_state=42, stratify=y_train
+# )
 
-# Tahmin ve değerlendirme
-y_pred = lgbm_model.predict(X_test)
-y_proba = lgbm_model.predict_proba(X_test)[:, 1]
+# # Modeli tanımla
+# lgbm_model = LGBMClassifier(
+#     n_estimators=1000,
+#     learning_rate=0.05,
+#     objective='binary',
+#     class_weight='balanced',
+#     random_state=42
+# )
 
-print("ROC AUC:", roc_auc_score(y_test, y_proba))
-print(classification_report(y_test, y_pred))
+# # Modeli eğit
+# lgbm_model.fit(
+#     X_train,
+#     y_train,
+#     eval_set=[(X_test, y_test)],
+#     eval_metric='auc'
+# )
 
-# cm = confusion_matrix(y_test, y_pred)
-# plt.figure(figsize=(6,5))
-# sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
-# plt.xlabel('Tahmin')
-# plt.ylabel('Gerçek')
-# plt.title('Confusion Matrix')
-# plt.show()
+# # Tahmin ve değerlendirme
+# y_pred = lgbm_model.predict(X_test)
+# y_proba = lgbm_model.predict_proba(X_test)[:, 1]
 
-bins = [0.0, 0.35, 0.70, 1.0]
-labels = ['Low Risk (0-35%)', 'Medium Risk (35-70%)', 'High Risk (70-100%)']
+# print("ROC AUC:", roc_auc_score(y_test, y_proba))
+# print(classification_report(y_test, y_pred))
 
-risk_categories = pd.cut(y_probs, bins=bins, labels=labels, include_lowest=True)
+# # cm = confusion_matrix(y_test, y_pred)
+# # plt.figure(figsize=(6,5))
+# # sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+# # plt.xlabel('Tahmin')
+# # plt.ylabel('Gerçek')
+# # plt.title('Confusion Matrix')
+# # plt.show()
 
-# Sonuçları DataFrame'de topla
-results_df = pd.DataFrame({
-    'Probability': y_probs,
-    'Risk Category': risk_categories,
-    'True Label': y_test.reset_index(drop=True)
-})
+# bins = [0.0, 0.35, 0.70, 1.0]
+# labels = ['Low Risk (0-35%)', 'Medium Risk (35-70%)', 'High Risk (70-100%)']
 
-# Her risk kategorisi için istatistikler
-summary = results_df.groupby('Risk Category')['True Label'].value_counts().unstack(fill_value=0)
+# risk_categories = pd.cut(y_probs, bins=bins, labels=labels, include_lowest=True)
 
-# Ayrıca her kategoride toplam örnek sayısı
-summary['Total'] = summary.sum(axis=1)
+# # Sonuçları DataFrame'de topla
+# results_df = pd.DataFrame({
+#     'Probability': y_probs,
+#     'Risk Category': risk_categories,
+#     'True Label': y_test.reset_index(drop=True)
+# })
 
-print(summary)
+# # Her risk kategorisi için istatistikler
+# summary = results_df.groupby('Risk Category')['True Label'].value_counts().unstack(fill_value=0)
 
-low_risk_max = 0.35
-medium_risk_max = 0.70
+# # Ayrıca her kategoride toplam örnek sayısı
+# summary['Total'] = summary.sum(axis=1)
 
-# Öncelikle test setindeki indeksleri alalım
-test_indices = y_test.index
+# print(summary)
 
-# Tahmin edilen olasılıkları test seti indeksine göre DataFrame haline getir
-prob_df = pd.DataFrame({
-    'TransactionID': data.loc[test_indices, 'TransactionID'],
-    'TrueLabel': y_test,
-    'Fraud_Probability': y_probs
-}, index=test_indices)
+# low_risk_max = 0.35
+# medium_risk_max = 0.70
 
-# Low Risk (0-35%) olanlar ve gerçek fraud olanlar
-dfdf = prob_df[(prob_df['Fraud_Probability'] <= low_risk_max) & (prob_df['TrueLabel'] == 1)]
+# # Öncelikle test setindeki indeksleri alalım
+# test_indices = y_test.index
 
-# Kaç satır olduğunu göster
-# print(f"Kaçırılan fraud sayısı (Low Risk içinde): {len(dfdf)}")
+# # Tahmin edilen olasılıkları test seti indeksine göre DataFrame haline getir
+# prob_df = pd.DataFrame({
+#     'TransactionID': data.loc[test_indices, 'TransactionID'],
+#     'TrueLabel': y_test,
+#     'Fraud_Probability': y_probs
+# }, index=test_indices)
 
-# # İlk birkaç satırı göster
-# print(dfdf.head(50))
+# # Low Risk (0-35%) olanlar ve gerçek fraud olanlar
+# dfdf = prob_df[(prob_df['Fraud_Probability'] <= low_risk_max) & (prob_df['TrueLabel'] == 1)]
 
-# explainer = shap.TreeExplainer(lgbm_model)
+# # Kaç satır olduğunu göster
+# # print(f"Kaçırılan fraud sayısı (Low Risk içinde): {len(dfdf)}")
 
-# # Test verisi üzerinde SHAP değerleri hesapla
-# shap_values = explainer.shap_values(X_test)
+# # # İlk birkaç satırı göster
+# # print(dfdf.head(50))
 
-# # Genel önemli özellikler
-# shap.summary_plot(shap_values, X_test, plot_type="bar")
+# # explainer = shap.TreeExplainer(lgbm_model)
 
-# # Detaylı global özet grafik (renkli)
-# shap.summary_plot(shap_values, X_test)
+# # # Test verisi üzerinde SHAP değerleri hesapla
+# # shap_values = explainer.shap_values(X_test)
 
-# # Belirli bir örnek için açıklama (mesela 5. satır)
-# idx = 5
-# shap.force_plot(explainer.expected_value, shap_values[idx], X_test.iloc[idx])
-# Risk kategorilerini tekrar tanımlayalım
-bins = [0.0, 0.35, 0.70, 1.0]
-labels = ['Low Risk', 'Medium Risk', 'High Risk']
+# # # Genel önemli özellikler
+# # shap.summary_plot(shap_values, X_test, plot_type="bar")
 
-# Test seti + tahminler
-final_df = data.loc[y_test.index, :].copy()
+# # # Detaylı global özet grafik (renkli)
+# # shap.summary_plot(shap_values, X_test)
 
-# Model tahmin olasılığı
-final_df['Fraud_Probability'] = y_probs
+# # # Belirli bir örnek için açıklama (mesela 5. satır)
+# # idx = 5
+# # shap.force_plot(explainer.expected_value, shap_values[idx], X_test.iloc[idx])
+# # Risk kategorilerini tekrar tanımlayalım
+# bins = [0.0, 0.35, 0.70, 1.0]
+# labels = ['Low Risk', 'Medium Risk', 'High Risk']
 
-# Risk kategorisi
-final_df['Risk_Category'] = pd.cut(
-    y_probs,
-    bins=bins,
-    labels=labels,
-    include_lowest=True
-)
+# # Test seti + tahminler
+# final_df = data.loc[y_test.index, :].copy()
 
-# Tahmin edilen etiket (0/1)
-final_df['Predicted_Label'] = (y_probs >= 0.32).astype(int)
+# # Model tahmin olasılığı
+# final_df['Fraud_Probability'] = y_probs
 
-# Gerçek etiket (isFraud)
-final_df['True_Label'] = y_test
+# # Risk kategorisi
+# final_df['Risk_Category'] = pd.cut(
+#     y_probs,
+#     bins=bins,
+#     labels=labels,
+#     include_lowest=True
+# )
 
-# Doğru / Yanlış Tahmin bilgisi
-final_df['Prediction_Result'] = np.where(
-    final_df['Predicted_Label'] == final_df['True_Label'],
-    'Correct',
-    'Incorrect'
-)
+# # Tahmin edilen etiket (0/1)
+# final_df['Predicted_Label'] = (y_probs >= 0.32).astype(int)
 
-# Eğer LightGBM'den feature importance almak istersen
-feature_importance = pd.DataFrame({
-    'Feature': X_train.columns,
-    'Importance': lgbm_model.feature_importances_
-}).sort_values(by='Importance', ascending=False)
+# # Gerçek etiket (isFraud)
+# final_df['True_Label'] = y_test
 
-# Çıktıları kaydet
-final_df.to_csv("fraud_analysis_results.csv", index=False)
-feature_importance.to_csv("feature_importance.csv", index=False)
+# # Doğru / Yanlış Tahmin bilgisi
+# final_df['Prediction_Result'] = np.where(
+#     final_df['Predicted_Label'] == final_df['True_Label'],
+#     'Correct',
+#     'Incorrect'
+# )
 
-print("\n✅ 'fraud_analysis_results.csv' dosyası oluşturuldu (Power BI için hazır).")
-print("✅ 'feature_importance.csv' dosyası oluşturuldu (özellik önemleri).")
+# # Eğer LightGBM'den feature importance almak istersen
+# feature_importance = pd.DataFrame({
+#     'Feature': X_train.columns,
+#     'Importance': lgbm_model.feature_importances_
+# }).sort_values(by='Importance', ascending=False)
+
+# # Çıktıları kaydet
+# #final_df.to_csv("fraud_analysis_results.csv", index=False)
+# #feature_importance.to_csv("feature_importance.csv", index=False)
+
+# print("\n✅ 'fraud_analysis_results.csv' dosyası oluşturuldu (Power BI için hazır).")
+# print("✅ 'feature_importance.csv' dosyası oluşturuldu (özellik önemleri).")
+#joblib.dump(lgbm_model, "fraud_model.pkl")
+#print("✅ Model kaydedildi: fraud_model.pkl")
+print(data.columns)
+
+#card4 radio button visa master discover american express
+#card6 radio button credit debit, işaretlenen radio butonları ilgili olduğu sütuna 1 değerini verecek örneğin "card6_debit"
+#ProductCD radio button "C" "H" "R" "S" "W"
+#HOUR
