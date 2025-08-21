@@ -10,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from collections import Counter
 from scipy.stats import zscore
 import os
+import joblib
 
 transactions = pandas.read_csv("C:\\Users\\Monster\\Desktop\\Erasmus 2025\\Internship WSTI\\IEEE\\ieee-fraud-detection\\train_transaction.csv")
 identity = pandas.read_csv("C:\\Users\\Monster\\Desktop\\Erasmus 2025\\Internship WSTI\\IEEE\\ieee-fraud-detection\\train_identity.csv")

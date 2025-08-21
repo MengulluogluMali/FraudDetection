@@ -42,8 +42,10 @@ df = pd.merge(transactions, identity, on="TransactionID", how="left")
 numeric_cols = [
     'TransactionAmt', 'TransactionDT', 'addr1', 'card3', 'card5',
     'id_01', 'id_02', 'id_05', 'id_06',
-    'id_11', 'id_13', 'id_17', 'id_19', 'id_20'
+    'id_11', 'id_13', 'id_17', 'id_19', 'id_20',
+    'addr2',
 ]
+
 
 # Eksik değerleri doldur
 df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].mean())
@@ -53,6 +55,6 @@ scaler = StandardScaler()
 scaler.fit(df[numeric_cols])
 
 # Kaydet
-joblib.dump(scaler, "scaler_22.pkl")
+joblib.dump(scaler, "scaler_2.pkl")
 print("✅ 22 sütun için scaler kaydedildi: scaler_22.pkl")
 
